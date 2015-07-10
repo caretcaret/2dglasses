@@ -30,15 +30,17 @@ def perform_rescale(source, target, width, height):
     'convert', source,
     '-resize', '{}x{}^'.format(width, height),
     '-gravity', 'center',
+    '-flatten',
     '-crop', '{}x{}+0+0'.format(width, height),
     target
   ])
 
 def main(output_directory, class_directories):
   mkdir_p(output_directory)
-  train_directory = mkdir_p("{}/train".format(output_directory))
-  test_directory = mkdir_p("{}/test".format(output_directory))
-  class_path = "{}/classes.txt".format(output_directory)
+  mkdir_p("{}/train".format(output_directory))
+  mkdir_p("{}/val".format(output_directory))
+  train_class_path = "{}/train.txt".format(output_directory)
+  val_class_path = "{}/val.txt".format(output_directory)
 
   classes = {}
 
@@ -46,16 +48,22 @@ def main(output_directory, class_directories):
   for i, class_directory in enumerate(class_directories):
     for image_path in glob.iglob("{}/*.*".format(class_directory)):
       image_name, extension = os.path.splitext(os.path.basename(image_path))
-      dataset = 'train' if random.random() < 0.8 else 'test'
+      dataset = 'train' if random.random() < 0.8 else 'val'
 
-      new_image_path = os.path.abspath("{}/{}/{}.jpg".format(output_directory, dataset, image_name))
+      new_image_filename = "{}.jpg".format(image_name)
+      new_image_path = os.path.abspath("{}/{}/{}".format(output_directory, dataset, new_image_filename))
 
-      perform_rescale(image_path, new_image_path, 256, 256) # dimensions used by caffenet
-      classes[new_image_path] = i
+      # dimensions used by caffenet
+      perform_rescale(image_path, new_image_path, 256, 256)
+      classes[dataset, new_image_filename] = i
 
-  with open(class_path, 'w') as class_file:
-    for path, val in classes.items():
-      class_file.write("{} {}\n".format(path, val))
+  with open(train_class_path, 'w') as train_class_file:
+    with open(val_class_path, 'w') as val_class_file:
+      for (dataset, path), val in classes.items():
+        if dataset == 'train':
+          train_class_file.write("{} {}\n".format(path, val))
+        else:
+          val_class_file.write("{} {}\n".format(path, val))
 
 
 if __name__ == '__main__':
