@@ -1,4 +1,6 @@
 data/
+*.caffemodel
+*.solverstate
 .DS_Store
 
 # Byte-compiled / optimized / DLL files
