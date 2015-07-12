@@ -26,3 +26,7 @@ Instead of the last step above:
 1. Download the caffenet model by running `./scripts/download_model_binary.py models/bvlc_reference_caffenet` in the caffe directory, and copy it to `./model`.
 2. `./scripts/train_caffenet_bootstrap.sh`
 
+## How to use the classifier
+
+1. `export CAFFE=/path/to/caffe`
+2. `./tools/classify.py <image>..`
