@@ -24,12 +24,12 @@ import caffe
 from caffe.proto import caffe_pb2
 
 IM_MEAN_PATH = './data/val_mean.binaryproto'
-DEPLOY_PATH = './model/deploy.prototxt'
+DEPLOY_PATH = './models/bootstrap/deploy.prototxt'
 CAFFEMODEL_PATH = './snapshots/bootstrap/caffenet_train_iter_10000.caffemodel'
 
-def build_classifier(im_mean_path, deploy_path, caffemodel_path):
+def build_net(im_mean_path, deploy_path, caffemodel_path, mode=caffe.TEST):
   caffe.set_mode_cpu()
-  net = caffe.Net(deploy_path, caffemodel_path, caffe.TEST)
+  net = caffe.Net(deploy_path, caffemodel_path, mode)
 
   im_mean_blob = caffe_pb2.BlobProto()
   with open(im_mean_path, 'rb') as im_mean_file:
@@ -49,13 +49,12 @@ def build_classifier(im_mean_path, deploy_path, caffemodel_path):
   return (net, transformer)
 
 def classify_image(net, transformer, im):
-  net.blobs['data'].reshape(1, 3, 227, 227)
   net.blobs['data'].data[...] = transformer.preprocess('data', im)
   p = net.forward()['prob']
   return (p[0][0], p[0][1])
 
 def command_line(images):
-  net, transformer = build_classifier(IM_MEAN_PATH, DEPLOY_PATH, CAFFEMODEL_PATH)
+  net, transformer = build_net(IM_MEAN_PATH, DEPLOY_PATH, CAFFEMODEL_PATH)
 
   for image_path in sys.argv[1:]:
     im = caffe.io.load_image(image_path)

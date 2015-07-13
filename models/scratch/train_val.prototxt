@@ -362,7 +362,7 @@ layer {
   bottom: "fc7"
   top: "fc8_binary"
   param {
-    lr_mult: 1
+    lr_mult: 10 # faster training
     decay_mult: 1
   }
   param {
@@ -392,9 +392,18 @@ layer {
   }
 }
 layer {
-  name: "loss"
-  type: "SoftmaxWithLoss"
+  name: "prob"
+  type: "Softmax"
   bottom: "fc8_binary"
+  top: "prob"
+}
+layer {
+  name: "loss"
+  type: "InfogainLoss"
+  bottom: "prob"
   bottom: "label"
+  infogain_loss_param {
+    source: "data/infogain.binaryproto"
+  }
   top: "loss"
 }
