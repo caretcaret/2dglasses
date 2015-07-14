@@ -10,7 +10,6 @@ The dataset I used is self-collected with duplicates removed, consisting of 9000
 You will need: python, caffe (already compiled), imagemagick (convert utility), 2d and 3d images
 
 ## How to train from scratch
-Error rate is 5.47% after 10000 iterations.
 
 1. `export CAFFE=/path/to/caffe`
 2. `python scripts/prepare_data.py /path/to/2d /path/to/3d` 
@@ -19,7 +18,7 @@ Error rate is 5.47% after 10000 iterations.
 5. `$CAFFE/build/tools/caffe train --solver=models/scratch/solver.prototxt`
 
 ## How to bootstrap training with caffenet
-Error rate is 1.36% after 10000 iterations with `bvlc_reference_caffenet`.
+Error rate is 1.63% after 10000 iterations with `bvlc_reference_caffenet`.
 
 Instead of the last step above:
 
