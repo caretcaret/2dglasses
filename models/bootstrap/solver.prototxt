@@ -10,5 +10,5 @@ max_iter: 450000
 momentum: 0.9
 weight_decay: 0.0005
 snapshot: 1000
-snapshot_prefix: "snapshots/bootstrap/"
+snapshot_prefix: "snapshots/bootstrap/train"
 solver_mode: CPU

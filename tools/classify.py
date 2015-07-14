@@ -25,7 +25,7 @@ from caffe.proto import caffe_pb2
 
 IM_MEAN_PATH = './data/val_mean.binaryproto'
 DEPLOY_PATH = './models/bootstrap/deploy.prototxt'
-CAFFEMODEL_PATH = './snapshots/bootstrap/caffenet_train_iter_10000.caffemodel'
+CAFFEMODEL_PATH = './snapshots/bootstrap/train_iter_10000.caffemodel'
 
 def build_net(im_mean_path, deploy_path, caffemodel_path, mode=caffe.TEST):
   caffe.set_mode_cpu()

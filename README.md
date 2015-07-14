@@ -1,7 +1,7 @@
 # 2dglasses
 
 ## What is this?
-Currently, files used to train a convolutional neural net to distinguish binary classes (intended usage: anime-style girls (2d) from photos of real life girls (3d)).
+Training a convolutional neural net to distinguish binary classes (intended usage: anime-style girls (2d) from photos of real life girls (3d)), and using deepdream methods to convert between images of those types.
 
 Using modified version of CaffeNet à la http://caffe.berkeleyvision.org/gathered/examples/finetune_flickr_style.html
 
@@ -30,3 +30,10 @@ Instead of the last step above:
 
 1. `export CAFFE=/path/to/caffe`
 2. `./tools/classify.py <image>..`
+
+## How to use the converter
+It doesn't really work. May need some more tuning or reworking.
+
+1. `export CAFFE=/path/to/caffe`
+2. `./tools/converter <2d or 3d> <source> <destination>`
+
