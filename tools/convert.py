@@ -48,7 +48,7 @@ def step_scale(net, base_img, scale, objective, n_iter=1, step_size=2, tile_size
   margin = (227 - tile_size) / 2
 
   src = net.blobs['data']
-  dst = net.blobs['prob']
+  dst = net.blobs['fc8_binary']
 
   detail = np.zeros_like(scaled)
 
@@ -59,20 +59,20 @@ def step_scale(net, base_img, scale, objective, n_iter=1, step_size=2, tile_size
     for r in range(0, scaled.shape[1], tile_size):
       for c in range(0, scaled.shape[2], tile_size):
         # offset window to center the actual tile size within 227x227 window
-        window = scaled.take(range(r - margin, r - margin + tile_size), axis=1, mode='wrap') \
-                       .take(range(c - margin, c - margin + tile_size), axis=2, mode='wrap')
-        detail_window = detail.take(range(r - margin, r - margin + tile_size), axis=1, mode='wrap') \
-                              .take(range(c - margin, c - margin + tile_size), axis=2, mode='wrap')
+        window = scaled.take(range(r - margin, r - margin + 227), axis=1, mode='wrap') \
+                       .take(range(c - margin, c - margin + 227), axis=2, mode='wrap')
+        detail_window = detail.take(range(r - margin, r - margin + 227), axis=1, mode='wrap') \
+                              .take(range(c - margin, c - margin + 227), axis=2, mode='wrap')
         src.data[0] = window + detail_window
         # run the network with objective
-        net.forward(end='prob')
+        net.forward(end='fc8_binary')
         objective(dst)
-        net.backward(start='prob')
+        net.backward(start='fc8_binary')
         g = src.diff[0]
         # normalize the diff
         g = g * step_size / (np.abs(g).mean() + np.finfo(np.float32).eps)
         # copy diff out (this shouldn't be that hard -_-)
-        r_begin, c_begin = r - margin, c - margin
+        r_begin, c_begin = r + margin, c + margin
         r_end = min(r_begin + tile_size, iter_detail.shape[1])
         c_end = min(c_begin + tile_size, iter_detail.shape[2])
         r_len, c_len = r_end - r_begin, c_end - c_begin
@@ -93,13 +93,12 @@ def step_scale(net, base_img, scale, objective, n_iter=1, step_size=2, tile_size
 
 def get_objective(target):
   def objective(dst):
-    # if target is 0, maximize activation of 0 and minimize activation of 1, and vice versa
-    # make such an update by adding a diff that would make it match that activation
-    desired_activation = np.array([[1, 0]]) if target == 0 else np.array([[0, 1]])
-    dst.diff[:] = 10000 * desired_activation - dst.data
+    # constant error for the target, adjust other classes to 0
+    # https://www.reddit.com/r/MachineLearning/comments/3df6ps//ct4u7id
+    dst.diff[:] = np.array([[1 if i == target else -dst.data[0][i] for i in range(dst.data.shape[1])]])
   return objective
 
-def convert(net, im, target, n_iter=500, n_scale=1, scale_factor=2**0.5, **step_params):
+def convert(net, im, target, n_iter=50, n_scale=1, scale_factor=2**0.5, **step_params):
   objective = get_objective(target)
 
   im = preprocess(net, im)
